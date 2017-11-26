@@ -24,31 +24,44 @@ public class GameManager : MonoBehaviour {
 	[SerializeField]
 	private Animator animator;
 
-	public int count = 0;
+	public static int count = 0;
 
 	[SerializeField]
 
 	public Text data;
 
+	private AudioSource audioSource;
+
+	public AudioClip correct;
+
+	public AudioClip errado;
+
 	[SerializeField]
+
 	private float timeBetweenQuestions = 3f;
 
 	void Start(){
+		audioSource = GetComponent<AudioSource>();
+			// Verifica se a lista de questões tá pronta para o game
 		if (unansweredQuestions == null || unansweredQuestions.Count == 0){
 			unansweredQuestions = questions.ToList<Question>();
 		}
+
+		// Chama a função responsável por mostrar a questão
 		SetCurrentQuestion();
-		
+
 		Debug.Log (currentQuestion.fact + " is " + currentQuestion.isTrue);
-		
+
 		data.text = "Pontos : " + count.ToString();
-	}
+
+		}
 
 	/* FUNCOES */ 
 
 	void SetCurrentQuestion(){
+		int n = unansweredQuestions.Count;
 		int randomQuestionIndex = Random.Range (0,unansweredQuestions.Count);
-		currentQuestion = unansweredQuestions[randomQuestionIndex];
+		if (n>0) {currentQuestion = unansweredQuestions[randomQuestionIndex];
 
 		factText.text = currentQuestion.fact;
 
@@ -62,6 +75,10 @@ public class GameManager : MonoBehaviour {
 		}
 
 		currentQuestion = unansweredQuestions[randomQuestionIndex];
+	}
+	else {
+		SceneManager.LoadScene("Fim");
+	}
 
 	}
 
@@ -86,11 +103,20 @@ public class GameManager : MonoBehaviour {
 		public void UserSelectTrue(){
 		animator.SetTrigger("True");
 		if (currentQuestion.isTrue){
+			
+			audioSource.clip = correct;
+     		audioSource.Play();
+
 			count++;
 			data.text = "Pontos : " + count.ToString();
 			Debug.Log ("Correto!");
+
 			}
 		else {
+			
+			audioSource.clip = errado;
+     		audioSource.Play();
+
 			Debug.Log("Errado!");
 		}
 
@@ -101,14 +127,19 @@ public class GameManager : MonoBehaviour {
 	public void UserSelectFalse(){
 		animator.SetTrigger("False");
 		if (!currentQuestion.isTrue){
+
+			audioSource.clip = correct;
+     		audioSource.Play();
+
 			count++;
 			data.text = "Pontos : " + count.ToString();
 			Debug.Log ( count + "Correto!");
 			}
 		else {
+			audioSource.clip = errado;
+     		audioSource.Play();
 			Debug.Log("Errado!");
 		}
 		StartCoroutine(TransitionToNextQuestion());
 		}
-
-}
+	}
